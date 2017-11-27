@@ -1,4 +1,3 @@
-#
 import numpy as np
 from keras.datasets import mnist
 from keras.models import Sequential
@@ -13,7 +12,7 @@ from keras.utils import np_utils
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-
+import socket
 # let's keep our keras backend tensorflow quiet
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
@@ -24,7 +23,14 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
 seed = 2141
 np.random.seed(seed)
 
+# Identificador de archivos de salida
 filenames = 'all'
+
+# Configuración de conexión
+tcp = '127.0.0.1'
+port = 1234
+buffer_size = 1024
+message = 'Hola, mundo!'
 
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -102,3 +108,12 @@ figure_evaluation
 
 plt.savefig(filenames + '_load_pred.png')
 print("Predictions saved as '" + filenames + "_load_pred.png'.")
+
+# Conexión de red a clientes
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((tcp, port))
+s.sendall(message.encode('utf-8'))
+data = s.recv(buffer_size)
+s.close()
+
+print('Datos recibidos: ' + data.decode('utf-8'))

@@ -13,6 +13,7 @@ from keras.utils import np_utils
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+import socket
 
 # let's keep our keras backend tensorflow quiet
 import os
@@ -25,6 +26,25 @@ seed = 2141
 np.random.seed(seed)
 
 filenames = '12'
+
+# Configuración de conexión
+tcp = '127.0.0.1'
+port = 1234
+buffer_size = 1024
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((tcp, port))
+print ('Escuchando...')
+s.listen(1)
+
+conn, addr = s.accept()
+# print ('Connection address: ' + addr)
+while 1:
+  data = conn.recv(buffer_size)
+  if not data: break
+  print ("Datos recibidos: " + data.decode('utf-8'))
+  conn.send(data)  # echo
+conn.close()
 
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -64,7 +84,7 @@ print("Train matrix shape", X_train.shape)
 print("Test matrix shape", X_test.shape)
 
 # one-hot encoding using keras' numpy-related utilities
-n_classes = 10
+n_classes = 3
 print("Shape before one-hot encoding: ", y_train.shape)
 Y_train = np_utils.to_categorical(y_train, n_classes)
 Y_test = np_utils.to_categorical(y_test, n_classes)
