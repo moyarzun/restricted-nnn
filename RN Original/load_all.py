@@ -12,7 +12,17 @@ from keras.utils import np_utils
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import socket
+import zmq
+import sys
+import pickle
+
+# Contexto ZeroMQ - Protocolo de comunicaciones
+context = zmq.Context()
+
+# Sockets usados por Context()
+sock = context.socket(zmq.REQ)
+sock.bind('tcp://127.0.0.1:1234')
+
 # let's keep our keras backend tensorflow quiet
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
@@ -26,14 +36,11 @@ np.random.seed(seed)
 # Identificador de archivos de salida
 filenames = 'all'
 
-# Configuración de conexión
-tcp = '127.0.0.1'
-port = 1234
-buffer_size = 1024
-message = 'Hola, mundo!'
-
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
+
+X_send = X_test
+y_send = y_test
 
 # let's print the shape before we reshape and normalize
 print("X_train shape", X_train.shape)
@@ -110,10 +117,8 @@ plt.savefig(filenames + '_load_pred.png')
 print("Predictions saved as '" + filenames + "_load_pred.png'.")
 
 # Conexión de red a clientes
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((tcp, port))
-s.sendall(message.encode('utf-8'))
-data = s.recv(buffer_size)
-s.close()
-
-print('Datos recibidos: ' + data.decode('utf-8'))
+sock.send(pickle.dumps(X_send))
+X_answer = sock.recv()
+# print(pickle.loads(X_answer))
+sock.send(pickle.dumps(y_send))
+y_answer = sock.recv()

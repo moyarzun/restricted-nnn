@@ -13,7 +13,11 @@ from keras.utils import np_utils
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import socket
+import zmq
+import pickle
+
+# Contexto ZeroMQ - Protocolo de comunicaciones
+context = zmq.Context()
 
 # let's keep our keras backend tensorflow quiet
 import os
@@ -27,68 +31,59 @@ np.random.seed(seed)
 
 filenames = '12'
 
-# Configuración de conexión
-tcp = '127.0.0.1'
-port = 1234
-buffer_size = 1024
+# ZeroMQ Context
+context = zmq.Context()
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((tcp, port))
-print ('Escuchando...')
-s.listen(1)
+# Define the socket using the "Context"
+sock = context.socket(zmq.REP)
+sock.connect("tcp://127.0.0.1:1234")
 
-conn, addr = s.accept()
-# print ('Connection address: ' + addr)
-while 1:
-  data = conn.recv(buffer_size)
-  if not data: break
-  print ("Datos recibidos: " + data.decode('utf-8'))
-  conn.send(data)  # echo
-conn.close()
+# Run a simple "Echo" server
+X_message = sock.recv()
+X_test = pickle.loads(X_message)
+sock.send(pickle.dumps(X_message))
+# print(X_message)
+y_message = sock.recv()
+y_test = pickle.loads(y_message)
 
 # Descargar dataset
-(X_train, y_train), (X_test, y_test) = mnist.load_data()
+# (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
 ###############################
 # This is the key... order is important!
-y_train[y_train<=0]=2
-y_train[y_train==1]=0
-y_train[y_train==2]=1
-y_train[y_train>=3]=2
-
 y_test[y_test<=0]=2
 y_test[y_test==1]=0
 y_test[y_test==2]=1
 y_test[y_test>=3]=2
 
-print(np.unique(y_train))
+print(np.unique(y_test))
 # [0 1 2]
 ###############################
 
 # let's print the shape before we reshape and normalize
-print("X_train shape", X_train.shape)
-print("y_train shape", y_train.shape)
+# print("X_train shape", X_train.shape)
+# print("y_train shape", y_train.shape)
 print("X_test shape", X_test.shape)
 print("y_test shape", y_test.shape)
 
 # building the input vector from the 28x28 pixels
-X_train = X_train.reshape(X_train.shape[0], 1, 28, 28).astype('float32')
+# X_train = X_train.reshape(X_train.shape[0], 1, 28, 28).astype('float32')
 X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
 
 # normalizing the data to help with the training
-X_train /= 255
+# X_train /= 255
 X_test /= 255
 
 # print the final input shape ready for training
-print("Train matrix shape", X_train.shape)
+# print("Train matrix shape", X_train.shape)
 print("Test matrix shape", X_test.shape)
 
 # one-hot encoding using keras' numpy-related utilities
 n_classes = 3
-print("Shape before one-hot encoding: ", y_train.shape)
-Y_train = np_utils.to_categorical(y_train, n_classes)
+# print("Shape before one-hot encoding: ", y_train.shape)
+# Y_train = np_utils.to_categorical(y_train, n_classes)
 Y_test = np_utils.to_categorical(y_test, n_classes)
-print("Shape after one-hot encoding: ", Y_train.shape)
+# print("Shape after one-hot encoding: ", Y_train.shape)
 
 # Cargar modelo preguardado
 model = load_model(filenames + '_model.h5')
