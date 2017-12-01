@@ -1,15 +1,21 @@
-#
 import numpy as np
 from keras.models import load_model
 from keras.utils import np_utils
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import zmq
-import pickle
+import zmq, pickle, sys, argparse
 
-# Contexto ZeroMQ - Protocolo de comunicaciones
+parser = argparse.ArgumentParser(description="Network node for MNIST image prediction.")
+parser.add_argument('ip', metavar='ip', type=str, help='Ip address of the other node')
+args = parser.parse_args()
+
+# ZeroMQ Context
 context = zmq.Context()
+
+# Define the socket using the "Context"
+sock = context.socket(zmq.REP)
+sock.connect('tcp://'+args.ip)
 
 # let's keep our keras backend tensorflow quiet
 import os
@@ -22,13 +28,6 @@ seed = 2141
 np.random.seed(seed)
 
 filenames = '12'
-
-# ZeroMQ Context
-context = zmq.Context()
-
-# Define the socket using the "Context"
-sock = context.socket(zmq.REP)
-sock.connect("tcp://127.0.0.1:1234")
 
 # Run a simple "Echo" server
 X_message = sock.recv()
