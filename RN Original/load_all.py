@@ -1,13 +1,5 @@
 import numpy as np
-from keras.datasets import mnist
-from keras.models import Sequential
 from keras.models import load_model
-from keras.layers import Dense
-from keras.layers import Dropout
-from keras.layers import Flatten
-from keras.layers import Activation
-from keras.layers.convolutional import Conv2D
-from keras.layers.convolutional import MaxPooling2D
 from keras.utils import np_utils
 import matplotlib
 matplotlib.use('agg')
