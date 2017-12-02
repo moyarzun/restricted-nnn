@@ -6,22 +6,26 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import zmq, pickle, sys, argparse
 
-parser = argparse.ArgumentParser(description="Network node for MNIST image prediction.")
-parser.add_argument('ip', metavar='ip', type=str, help='Ip address of the other node')
-args = parser.parse_args()
-
 # ZeroMQ Context
 context = zmq.Context()
 
 # Define the socket using the "Context"
 sock = context.socket(zmq.REP)
-sock.connect('tcp://'+args.ip)
 
-# let's keep our keras backend tensorflow quiet
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
-# for testing on CPU
-#os.environ['CUDA_VISIBLE_DEVICES'] = ''
+## Gets IP and PORT from command line and parses them
+ConnectionInfo = argparse.ArgumentParser()
+ConnectionInfo.add_argument("-n",  default='127.0.0.1')
+ConnectionInfo.add_argument("-p", type=str, default='1234')
+ConnectionInfoParsed = ConnectionInfo.parse_args()
+
+# Saves the parsed IP and Port
+ip = ConnectionInfoParsed.n
+port = ConnectionInfoParsed.p
+
+try:
+    sock.connect((ip, port))
+except:
+    print('Usage: python load_12.py -n <valid ip address> -p <valid port address>')
 
 # Fijar semilla para reproducir experimento
 seed = 2141
@@ -30,12 +34,15 @@ np.random.seed(seed)
 filenames = '12'
 
 # Run a simple "Echo" server
+print('Listening to tcp://'+ip+':'+port+'...')
 X_message = sock.recv()
+print('Receiving data...')
 X_test = pickle.loads(X_message)
 sock.send(pickle.dumps(X_message))
 # print(X_message)
 y_message = sock.recv()
 y_test = pickle.loads(y_message)
+print('Data received. Starting classification...')
 
 # Descargar dataset
 # (X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -124,4 +131,6 @@ figure_evaluation
 
 plt.savefig(filenames+'_load_pred.png')
 print("Predictions saved as '" + filenames + "_load_pred.png'.")
+print('Waiting for network to finish classification...')
 sock.send(pickle.dumps(y_message))
+print('Done.')
