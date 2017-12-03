@@ -7,21 +7,30 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import zmq, sys, pickle, argparse, os
 
+filenames = 'all'
+port_in = '5000'
+port_out = '5001'
+
+## Gets IP and PORT from command line and parses them
 ConnectionInfo = argparse.ArgumentParser()
-ConnectionInfo.add_argument("-n",  default='127.0.0.1')
-ConnectionInfo.add_argument("-p", type=str, default='1234')
+ConnectionInfo.add_argument("-i",  default='127.0.0.1')
+ConnectionInfo.add_argument("-o",  default='127.0.0.1')
 ConnectionInfoParsed = ConnectionInfo.parse_args()
 
 # Saves the parsed IP and Port
-ip = ConnectionInfoParsed.n
-port = ConnectionInfoParsed.p
+ip_in = ConnectionInfoParsed.i
+ip_out = ConnectionInfoParsed.o
 
 # Contexto ZeroMQ - Protocolo de comunicaciones
 context = zmq.Context()
 
 # Sockets usados por Context()
 sock = context.socket(zmq.REQ)
-sock.bind('tcp://'+ip+':'+port)
+try:
+    sock.bind('tcp://'+ip_in+':'+port_in)
+except:
+    print('Usage: python load_'+filenames+'.py -i <valid input ip address> -o <valid output ip address>')
+
 
 # Fijar semilla para reproducir experimento
 seed = 2141
@@ -111,12 +120,18 @@ plt.savefig(filenames + '_load_pred.png')
 print("Predictions saved as '" + filenames + "_load_pred.png'.")
 
 # Conexión de red a clientes
-print('Waiting for connection at tcp://'+ip+':'+port+'...')
+print('Waiting for connection at tcp://'+ip_out+':'+port_out+'...')
 sock.send(pickle.dumps(X_send))
 print('Sendind data...')
 X_answer = sock.recv()
 # print(pickle.loads(X_answer))
 sock.send(pickle.dumps(y_send))
-print('Data sent. Waiting for classification...')
 y_answer = sock.recv()
+print('Data sent. Waiting for classification...')
+
+# Espera hasta que concluya la clasificación
+sock = context.socket(zmq.REP)
+sock.connect('tcp://'+ip_in':'+port_in)
+end_classif = sock.recv()
+sock.send_string('ack')
 print('Done.')
