@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import zmq, pickle, sys, argparse
 
 filenames = '89'
-port_in = '5005'
-port_out = '5000'
+port_in = '5000'
+port_out = '5001'
 
 # ZeroMQ Context
 context = zmq.Context()

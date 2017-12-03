@@ -7,8 +7,7 @@ import matplotlib.pyplot as plt
 import zmq, pickle, sys, argparse
 
 filenames = '67'
-port_in = '5004'
-port_out = '5005'
+port = '5000'
 
 # ZeroMQ Context
 context = zmq.Context()
@@ -27,7 +26,7 @@ ip_in = ConnectionInfoParsed.i
 ip_out = ConnectionInfoParsed.o
 
 try:
-    sock.connect('tcp://'+ip_in+':'+port_in)
+    sock.connect('tcp://'+ip_in+':'+port)
 except:
     print('Usage: python load_'+filenames+'.py -i <valid input ip address> -o <valid output ip address>')
 
@@ -36,7 +35,7 @@ seed = 2141
 np.random.seed(seed)
 
 # Run a simple "Echo" server
-print('Listening to tcp://'+ip_in+':'+port_in+'...')
+print('Listening to tcp://'+ip_in+':'+port+'...')
 X_message = sock.recv()
 print('Receiving data...')
 X_test = pickle.loads(X_message)
@@ -45,6 +44,7 @@ sock.send(pickle.dumps(X_message))
 y_message = sock.recv()
 y_test = pickle.loads(y_message)
 sock.send(pickle.dumps(y_message))
+sock.close()
 print('Data received. Starting classification...')
 
 X_send = X_test
@@ -137,13 +137,14 @@ figure_evaluation
 
 plt.savefig(filenames+'_load_pred.png')
 print("Predictions saved as '" + filenames + "_load_pred.png'.")
-print("Sending data to the next node at tcp://"+ip_out+":"+port_out+"...")
+print("Sending data to the next node at tcp://"+ip_out+":"+port+"...")
 # Preparing ZeroMQ context for the next node...
 sock = context.socket(zmq.REQ)
-sock.bind('tcp://'+ip_out+':'+port_out)
+sock.bind('tcp://'+ip_out+':'+port)
 sock.send(pickle.dumps(X_send))
 X_answer = sock.recv()
 sock.send(pickle.dumps(y_send))
 y_answer = sock.recv()
+sock.close()
 # sock.send(pickle.dumps(y_message))
 print('Done')
