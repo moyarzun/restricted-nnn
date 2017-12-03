@@ -137,7 +137,7 @@ figure_evaluation
 
 plt.savefig(filenames+'_load_pred.png')
 print("Predictions saved as '" + filenames + "_load_pred.png'.")
-print("Sending data to the next node...")
+print("Sending data to the next node at tcp://"+ip_out+":"+port_out+"...")
 # Preparing ZeroMQ context for the next node...
 sock = context.socket(zmq.REQ)
 sock.bind('tcp://'+ip_out+':'+port_out)

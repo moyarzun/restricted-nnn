@@ -131,7 +131,7 @@ print('Data sent. Waiting for classification...')
 
 # Espera hasta que concluya la clasificación
 sock = context.socket(zmq.REP)
-sock.connect('tcp://'+ip_in':'+port_in)
+sock.connect('tcp://'+ip_in+':'+port_in)
 end_classif = sock.recv()
 sock.send_string('ack')
 print('Done.')
