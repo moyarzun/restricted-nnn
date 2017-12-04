@@ -79,7 +79,7 @@ X_test /= 255
 print("Test matrix shape", X_test.shape)
 
 # one-hot encoding using keras' numpy-related utilities
-n_classes = 3)
+n_classes = 3
 Y_test = np_utils.to_categorical(y_test, n_classes)
 
 # Cargar modelo preguardado
