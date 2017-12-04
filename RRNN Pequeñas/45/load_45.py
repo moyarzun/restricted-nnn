@@ -18,7 +18,7 @@ sock = context.socket(zmq.REP)
 ## Gets IP and PORT from command line and parses them
 ConnectionInfo = argparse.ArgumentParser()
 ConnectionInfo.add_argument("-i",  default='127.0.0.1')
-ConnectionInfo.add_argument("-o",  default='127.0.0.1')
+ConnectionInfo.add_argument("-o",  default='0.0.0.0')
 ConnectionInfoParsed = ConnectionInfo.parse_args()
 
 # Saves the parsed IP and Port
