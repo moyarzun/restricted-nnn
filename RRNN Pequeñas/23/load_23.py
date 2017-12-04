@@ -51,7 +51,6 @@ print('Data received. Starting classification...')
 X_send = copy.copy(X_test)
 y_send = copy.copy(y_test)
 
-print(y_send)
 # Descargar dataset
 
 ###############################
@@ -61,7 +60,7 @@ y_test[y_test==2]=0
 y_test[y_test==3]=1
 y_test[y_test>=4]=2
 
-print(np.unique(y_test))
+# print(np.unique(y_test))
 # [0 1 2]
 ###############################
 
