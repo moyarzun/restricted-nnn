@@ -21,11 +21,6 @@ ConnectionInfoParsed = ConnectionInfo.parse_args()
 ip_in = ConnectionInfoParsed.i
 ip_out = ConnectionInfoParsed.o
 
-try:
-    sock.connect('tcp://'+ip_in+':'+port)
-except:
-    print('Usage: python load_'+filenames+'.py -i <valid input ip address> -o <valid output ip address>')
-
 # Fijar semilla para reproducir experimento
 seed = 2141
 np.random.seed(seed)
@@ -35,9 +30,6 @@ np.random.seed(seed)
 
 X_send = X_test
 y_send = y_test
-
-# Descargar dataset
-# (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
 ###############################
 # This is the key... order is important!
@@ -125,6 +117,8 @@ plt.savefig(filenames+'_load_pred.png')
 print("Predictions saved as '" + filenames + "_load_pred.png'.")
 print("Sending data to the next node at tcp://"+ip_out+":"+port+"...")
 
+# ZeroMQ Context
+context = zmq.Context()
 # Preparing ZeroMQ context for the next node...
 sock = context.socket(zmq.REQ)
 sock.bind('tcp://'+ip_out+':'+port)
