@@ -4,7 +4,7 @@ from keras.utils import np_utils
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import zmq, pickle, sys, argparse
+import zmq, pickle, sys, argparse, copy
 
 filenames = '45'
 port = '5000'
@@ -47,11 +47,8 @@ sock.send(pickle.dumps(y_message))
 sock.close()
 print('Data received. Starting classification...')
 
-X_send = X_test
-y_send = y_test
-
-# Descargar dataset
-# (X_train, y_train), (X_test, y_test) = mnist.load_data()
+X_send = copy.copy(X_test)
+y_send = copy.copy(y_test)
 
 ###############################
 # This is the key... order is important!
@@ -60,34 +57,25 @@ y_test[y_test==4]=0
 y_test[y_test==5]=1
 y_test[y_test>=6]=2
 
-print(np.unique(y_test))
-# [0 1 2]
+# print(np.unique(y_test))
 ###############################
 
 # let's print the shape before we reshape and normalize
-# print("X_train shape", X_train.shape)
-# print("y_train shape", y_train.shape)
 print("X_test shape", X_test.shape)
 print("y_test shape", y_test.shape)
 
 # building the input vector from the 28x28 pixels
-# X_train = X_train.reshape(X_train.shape[0], 1, 28, 28).astype('float32')
 X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
 
 # normalizing the data to help with the training
-# X_train /= 255
 X_test /= 255
 
 # print the final input shape ready for training
-# print("Train matrix shape", X_train.shape)
 print("Test matrix shape", X_test.shape)
 
 # one-hot encoding using keras' numpy-related utilities
 n_classes = 3
-# print("Shape before one-hot encoding: ", y_train.shape)
-# Y_train = np_utils.to_categorical(y_train, n_classes)
 Y_test = np_utils.to_categorical(y_test, n_classes)
-# print("Shape after one-hot encoding: ", Y_train.shape)
 
 # Cargar modelo preguardado
 model = load_model(filenames + '_model.h5')
@@ -146,5 +134,4 @@ X_answer = sock.recv()
 sock.send(pickle.dumps(y_send))
 y_answer = sock.recv()
 sock.close()
-# sock.send(pickle.dumps(y_message))
 print('Done')
