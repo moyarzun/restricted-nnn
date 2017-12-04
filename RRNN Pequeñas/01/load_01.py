@@ -1,19 +1,15 @@
 import numpy as np
+from keras.datasets import mnist
 from keras.models import load_model
 from keras.utils import np_utils
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import zmq, pickle, sys, argparse
+import zmq, sys, pickle, argparse, os
 
 filenames = '01'
 port = '5000'
-
-# ZeroMQ Context
-context = zmq.Context()
-
-# Define the socket using the "Context"
-sock = context.socket(zmq.REP)
+port_end = '5001'
 
 ## Gets IP and PORT from command line and parses them
 ConnectionInfo = argparse.ArgumentParser()
@@ -34,18 +30,8 @@ except:
 seed = 2141
 np.random.seed(seed)
 
-# Run a simple "Echo" server
-print('Listening to tcp://'+ip_in+':'+port+'...')
-X_message = sock.recv()
-print('Receiving data...')
-X_test = pickle.loads(X_message)
-sock.send(pickle.dumps(X_message))
-# print(X_message)
-y_message = sock.recv()
-y_test = pickle.loads(y_message)
-sock.send(pickle.dumps(y_message))
-sock.close()
-print('Data received. Starting classification...')
+# Descargar dataset
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
 
 X_send = X_test
 y_send = y_test
@@ -138,6 +124,7 @@ figure_evaluation
 plt.savefig(filenames+'_load_pred.png')
 print("Predictions saved as '" + filenames + "_load_pred.png'.")
 print("Sending data to the next node at tcp://"+ip_out+":"+port+"...")
+
 # Preparing ZeroMQ context for the next node...
 sock = context.socket(zmq.REQ)
 sock.bind('tcp://'+ip_out+':'+port)
@@ -145,6 +132,13 @@ sock.send(pickle.dumps(X_send))
 X_answer = sock.recv()
 sock.send(pickle.dumps(y_send))
 y_answer = sock.recv()
+print('Data sent. Waiting for classification...')
 sock.close()
-# sock.send(pickle.dumps(y_message))
-print('Done')
+
+# Espera hasta que concluya la clasificación
+sock = context.socket(zmq.REP)
+sock.connect('tcp://'+ip_in+':'+port_end)
+end_classif = sock.recv()
+sock.send_string('ack')
+sock.close()
+print('Done.')
