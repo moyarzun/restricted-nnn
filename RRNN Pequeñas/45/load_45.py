@@ -55,10 +55,10 @@ y_send = y_test
 
 ###############################
 # This is the key... order is important!
-y_test[y_test<=0]=2
-y_test[y_test==1]=0
-y_test[y_test==2]=1
-y_test[y_test>=3]=2
+y_test[y_test<=3]=2
+y_test[y_test==4]=0
+y_test[y_test==5]=1
+y_test[y_test>=6=2
 
 print(np.unique(y_test))
 # [0 1 2]
