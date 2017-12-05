@@ -74,10 +74,12 @@ if predicted_classes == 2:
     print('Data sent to next node.')
     sock.close()
 else:
-    print("predicted class: ", predicted_classes)
+    print("Predicted class: ", predicted_classes)
     sock = context.socket(zmq.REQ)
+    print("Sending results to tcp://"+ip_out+":"+port_out)
     sock.connect('tcp://'+ip_out+':'+port_out)
     sock.send(pickle.dumps(predicted_classes+2))
     end_string = sock.recv()
+    sock.close()
 
 print('Done!')
