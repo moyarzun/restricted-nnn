@@ -68,17 +68,18 @@ if predicted_classes == 2:
     context = zmq.Context()
     # Preparing ZeroMQ context for the next node...
     sock = context.socket(zmq.REQ)
-    sock.connect('tcp://'+ip_out+':'+port)
+    sock.bind('tcp://0.0.0.0:'+port)
     sock.send(pickle.dumps(message))
     X_answer = sock.recv()
-    print('Data sent to the next node.')
+    print('Data sent to next node.')
     sock.close()
 else:
     print("predicted class: ", predicted_classes)
-    sock = context.socket(zmq.REQ)
-    print("Sending results to tcp://"+ip_out+":"+port_out+"...")
+    # ZeroMQ Context
+    context = zmq.Context()
+    sock = context.socket(zmq.REP)
     sock.connect('tcp://'+ip_out+':'+port_out)
-    sock.send(pickle.dumps(predicted_classes+4))
     end_string = sock.recv()
+    sock.send(pickle.dumps(predicted_classes+4))
 
 print('Done!')
