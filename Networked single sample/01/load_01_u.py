@@ -30,8 +30,8 @@ print("sample", sample)
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-foo = X_test[1]
-print("Class: ", y_test[1])
+foo = X_test[999]
+print("Class: ", y_test[999])
 foo = np.expand_dims(foo, axis=0)
 message = foo
 
@@ -61,19 +61,19 @@ if predicted_classes == 2:
     # ZeroMQ Context
     context = zmq.Context()
     # Preparing ZeroMQ context for the next node...
-    sock1 = context.socket(zmq.REQ)
-    sock1.bind('tcp://0.0.0.0:'+port)
-    sock1.send(pickle.dumps(message))
-    X_answer = sock1.recv()
-    print('Data sent. Waiting for classification.')
-    sock1.close()
+    sock = context.socket(zmq.REQ)
+    sock.bind('tcp://'+ip_out+':'+port)
+    sock.send(pickle.dumps(message))
+    X_answer = sock.recv()
+    print('Data sent. Waiting for classification...')
+    sock.close()
 
     # Espera hasta que concluya la clasificación
-    sock2 = context.socket(zmq.REQ)
-    sock2.bind('tcp://0.0.0.0:'+port_end)
-    end_classif = sock2.recv()
-    sock2.send_string('ack')
-    sock2.close()
+    sock = context.socket(zmq.REP)
+    sock.connect('tcp://'+ip_in+':'+port_end)
+    end_classif = sock.recv()
+    sock.send_string('ack')
+    sock.close()
     end_result = pickle.loads(end_classif)
     if end_result == -1:
         print("Network couldn't classify tour sample. Sorry! =(")
