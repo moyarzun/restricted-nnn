@@ -30,7 +30,7 @@ print("sample", sample)
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-foo = X_test[111]
+foo = X_test[1]
 print("Class: ", y_test[1])
 foo = np.expand_dims(foo, axis=0)
 message = foo
