@@ -71,14 +71,15 @@ if predicted_classes == 2:
     # Espera hasta que concluya la clasificación
     sock = context.socket(zmq.REQ)
     sock.bind('tcp://0.0.0.0:'+port_end)
-    end_classif = sock.recv()
-    sock.send_string('ack')
+    for x in range (1, 6):
+        sock.send_string('ack')
+        result = sock.recv()
+        result = pickle.loads(result)
+        if end_result == -1:
+            print("Node "+ x +" couldn't classify your sample.")
+        else:
+            print("Node "+ x +" predicted class: ", end_result)
     sock.close()
-    end_result = pickle.loads(end_classif)
-    if end_result == -1:
-        print("Network couldn't classify tour sample. Sorry! =(")
-    else:
-        print("Predicted class: ", end_result)
 else:
     print("Predicted class: ", predicted_classes)
 

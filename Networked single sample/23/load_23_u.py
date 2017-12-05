@@ -79,7 +79,6 @@ else:
     context = zmq.Context()
     sock = context.socket(zmq.REP)
     sock.connect('tcp://'+ip_out+':'+port_out)
-    sock.send(pickle.dumps(predicted_classes+2))
     end_string = sock.recv()
-
+    sock.send(pickle.dumps(predicted_classes+2))
 print('Done!')
