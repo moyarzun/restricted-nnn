@@ -30,8 +30,10 @@ print("sample", sample)
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-foo = X_test[355]
+foo = X_test[999]
+print("Class: ", y_test[999])
 foo = np.expand_dims(foo, axis=0)
+message = foo
 
 # building the input vector from the 28x28 pixels
 foo = foo.reshape(foo.shape[0], 1, 28, 28).astype('float32')
@@ -61,7 +63,7 @@ if predicted_classes == 2:
     # Preparing ZeroMQ context for the next node...
     sock = context.socket(zmq.REQ)
     sock.bind('tcp://'+ip_out+':'+port)
-    sock.send(pickle.dumps(foo))
+    sock.send(pickle.dumps(message))
     X_answer = sock.recv()
     print('Data sent. Waiting for classification...')
     sock.close()

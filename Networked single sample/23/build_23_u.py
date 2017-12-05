@@ -13,17 +13,18 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
-# Fijar semilla para reproducir experimento
+# Fixed seed
 seed = 2141
 np.random.seed(seed)
 
 filenames = '23_u'
+n_classes = 3
 
-# Descargar dataset
+# Dataset download (if not in local, from Internet)
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
 ###############################
-# This is the key... order is important!
+# Class re-tagging
 y_train[y_train<=1]=2
 y_train[y_train==2]=0
 y_train[y_train==3]=1
@@ -33,35 +34,19 @@ y_test[y_test<=1]=2
 y_test[y_test==2]=0
 y_test[y_test==3]=1
 y_test[y_test>=4]=2
-
-print(np.unique(y_train))
-# [0 1 2]
 ###############################
 
-# let's print the shape before we reshape and normalize
-print("X_train shape", X_train.shape)
-print("y_train shape", y_train.shape)
-print("X_test shape", X_test.shape)
-print("y_test shape", y_test.shape)
-
-# building the input vector from the 28x28 pixels
+# Building the input vector from the 28x28 pixels
 X_train = X_train.reshape(X_train.shape[0], 1, 28, 28).astype('float32')
 X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
 
-# normalizing the data to help with the training
+# Normalizing the data to help with the training
 X_train /= 255
 X_test /= 255
 
-# print the final input shape ready for training
-print("Train matrix shape", X_train.shape)
-print("Test matrix shape", X_test.shape)
-
-# one-hot encoding using keras' numpy-related utilities
-n_classes = 3
-print("Shape before one-hot encoding: ", y_train.shape)
+# One-hot encoding
 Y_train = np_utils.to_categorical(y_train, n_classes)
 Y_test = np_utils.to_categorical(y_test, n_classes)
-print("Shape after one-hot encoding: ", Y_train.shape)
 
 # Definición del modelo
 def baseline_model():
@@ -87,14 +72,13 @@ history = model.fit(X_train, Y_train,
           verbose=1,
           validation_data=(X_test, Y_test))
 
-# saving the model
-# Guardar modelo en formato HDF5
+# Saving the model
 model.save(filenames + '_model.h5')
-# Guardar tensores en formato HDF5
+# Saving weights
 model.save_weights(filenames + '_tensors.h5')
 print('Model saved.')
 
-# plotting the metrics
+# Plotting the metrics
 fig = plt.figure()
 plt.subplot(2,1,1)
 plt.plot(history.history['acc'])
@@ -122,22 +106,22 @@ loss_and_metrics = model.evaluate(X_test, Y_test, verbose=2)
 print("Test Loss", loss_and_metrics[0])
 print("Test Accuracy", loss_and_metrics[1])
 
-# load the model and create predictions on the test set
+# Load the model and create predictions on the test set
 predicted_classes = model.predict_classes(X_test)
 
-# see which we predicted correctly and which not
+# See which we predicted correctly and which not
 correct_indices = np.nonzero(predicted_classes == y_test)[0]
 incorrect_indices = np.nonzero(predicted_classes != y_test)[0]
 print()
 print(len(correct_indices)," classified correctly")
 print(len(incorrect_indices)," classified incorrectly")
 
-# adapt figure size to accomodate 18 subplots
+# Adapt figure size to accomodate 18 subplots
 plt.rcParams['figure.figsize'] = (7,14)
 
 figure_evaluation = plt.figure()
 
-# plot 9 correct predictions
+# Plot 9 correct predictions
 for i, correct in enumerate(correct_indices[:9]):
     plt.subplot(6,3,i+1)
     plt.imshow(X_test[correct].reshape(28,28), cmap='gray', interpolation='none')
@@ -147,7 +131,7 @@ for i, correct in enumerate(correct_indices[:9]):
     plt.xticks([])
     plt.yticks([])
 
-# plot 9 incorrect predictions
+# Plot 9 incorrect predictions
 for i, incorrect in enumerate(incorrect_indices[:9]):
     plt.subplot(6,3,i+10)
     plt.imshow(X_test[incorrect].reshape(28,28), cmap='gray', interpolation='none')

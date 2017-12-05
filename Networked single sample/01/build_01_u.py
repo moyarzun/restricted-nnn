@@ -13,17 +13,21 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
-# Fijar semilla para reproducir experimento
+# Fixed seed for experiment replayability
 seed = 2141
 np.random.seed(seed)
 
 filenames = '01_u'
+n_classes = 3
 
-# Descargar dataset
+# Dataset download (If not local, from Internet)
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
 ###############################
-# This is the key... order is important!
+# Re-tagging the dataset for the specific classes we want to train
+# 0 -> Class 1
+# 1 -> Class 2
+# 2 -> 'Others'
 y_train[y_train==0]=0
 y_train[y_train==1]=1
 y_train[y_train>=2]=2
@@ -31,36 +35,21 @@ y_train[y_train>=2]=2
 y_test[y_test==0]=0
 y_test[y_test==1]=1
 y_test[y_test>=2]=2
-
-print(np.unique(y_train))
 ###############################
 
-# let's print the shape before we reshape and normalize
-print("X_train shape", X_train.shape)
-print("y_train shape", y_train.shape)
-print("X_test shape", X_test.shape)
-print("y_test shape", y_test.shape)
-
-# building the input vector from the 28x28 pixels
+# Building the input vector from the 28x28 pixels
 X_train = X_train.reshape(X_train.shape[0], 1, 28, 28).astype('float32')
 X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
 
-# normalizing the data to help with the training
+# Normalizing the data
 X_train /= 255
 X_test /= 255
 
-# print the final input shape ready for training
-print("Train matrix shape", X_train.shape)
-print("Test matrix shape", X_test.shape)
-
-# one-hot encoding using keras' numpy-related utilities
-n_classes = 3
-print("Shape before one-hot encoding: ", y_train.shape)
+# One-hot encoding
 Y_train = np_utils.to_categorical(y_train, n_classes)
 Y_test = np_utils.to_categorical(y_test, n_classes)
-print("Shape after one-hot encoding: ", Y_train.shape)
 
-# Definición del modelo
+# Model design
 def baseline_model():
     model = Sequential()
     model.add(Conv2D(32, (5, 5), input_shape=(1, 28, 28), activation='relu', data_format='channels_first'))
@@ -72,25 +61,25 @@ def baseline_model():
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
 
-# Construcción del modelo
+# Model building
 model = baseline_model()
 
-# Compilación del modelo
+# Model compiling
 model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='adam')
 
-# Entrenamiento del modelo y almacenamiento de métricas
+# Model training and metrics capture
 history = model.fit(X_train, Y_train,
           batch_size=200, epochs=5,
           verbose=1,
           validation_data=(X_test, Y_test))
 
-# Guardar modelo en formato HDF5
+# Saving model
 model.save(filenames + '_model.h5')
-# Guardar tensores en formato HDF5
+# Saving weights
 model.save_weights(filenames + '_tensors.h5')
 print('Model saved.')
 
-# plotting the metrics
+# Plotting the metrics
 fig = plt.figure()
 plt.subplot(2,1,1)
 plt.plot(history.history['acc'])
@@ -121,19 +110,19 @@ print("Test Accuracy", loss_and_metrics[1])
 # load the model and create predictions on the test set
 predicted_classes = model.predict_classes(X_test)
 
-# see which we predicted correctly and which not
+# See which we predicted correctly and which not
 correct_indices = np.nonzero(predicted_classes == y_test)[0]
 incorrect_indices = np.nonzero(predicted_classes != y_test)[0]
 print()
 print(len(correct_indices)," classified correctly")
 print(len(incorrect_indices)," classified incorrectly")
 
-# adapt figure size to accomodate 18 subplots
+# Adapt figure size to accomodate 18 subplots
 plt.rcParams['figure.figsize'] = (7,14)
 
 figure_evaluation = plt.figure()
 
-# plot 9 correct predictions
+# Plot 9 correct predictions
 for i, correct in enumerate(correct_indices[:9]):
     plt.subplot(6,3,i+1)
     plt.imshow(X_test[correct].reshape(28,28), cmap='gray', interpolation='none')
@@ -143,7 +132,7 @@ for i, correct in enumerate(correct_indices[:9]):
     plt.xticks([])
     plt.yticks([])
 
-# plot 9 incorrect predictions
+# Plot 9 incorrect predictions
 for i, incorrect in enumerate(incorrect_indices[:9]):
     plt.subplot(6,3,i+10)
     plt.imshow(X_test[incorrect].reshape(28,28), cmap='gray', interpolation='none')

@@ -80,8 +80,8 @@ model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='
 
 # Entrenamiento del modelo y almacenamiento de métricas
 history = model.fit(X_train, Y_train,
-          batch_size=128, epochs=20,
-          verbose=2,
+          batch_size=200, epochs=5,
+          verbose=1,
           validation_data=(X_test, Y_test))
 
 # saving the model

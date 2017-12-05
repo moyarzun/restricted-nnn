@@ -43,6 +43,7 @@ X_test = pickle.loads(X_message)
 sock.send(pickle.dumps(X_message))
 sock.close()
 print('Data received. Starting classification...')
+message = X_test
 
 # building the input vector from the 28x28 pixels
 X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
@@ -68,7 +69,7 @@ if predicted_classes == 2:
     # Preparing ZeroMQ context for the next node...
     sock = context.socket(zmq.REQ)
     sock.bind('tcp://'+ip_out+':'+port)
-    sock.send(pickle.dumps(foo))
+    sock.send(pickle.dumps(message))
     X_answer = sock.recv()
     print('Data sent to the next node.')
     sock.close()

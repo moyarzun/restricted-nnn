@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 seed = 2141
 np.random.seed(seed)
 
-filenames = '67'
+filenames = '67_u'
 
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
