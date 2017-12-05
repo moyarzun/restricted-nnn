@@ -64,14 +64,14 @@ if predicted_classes == 2:
     sock1 = context.socket(zmq.REQ)
     sock1.bind('tcp://0.0.0.0:'+port)
     sock1.send(pickle.dumps(message))
-    X_answer = sock.recv()
+    X_answer = sock1.recv()
     print('Data sent. Waiting for classification.')
     sock1.close()
 
     # Espera hasta que concluya la clasificación
     sock2 = context.socket(zmq.REQ)
     sock2.bind('tcp://0.0.0.0:'+port_end)
-    end_classif = sock.recv()
+    end_classif = sock2.recv()
     sock2.send_string('ack')
     sock2.close()
     end_result = pickle.loads(end_classif)
