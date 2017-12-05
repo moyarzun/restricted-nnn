@@ -61,19 +61,19 @@ if predicted_classes == 2:
     # ZeroMQ Context
     context = zmq.Context()
     # Preparing ZeroMQ context for the next node...
-    sock = context.socket(zmq.REQ)
-    sock.bind('tcp://0.0.0.0:'+port)
-    sock.send(pickle.dumps(message))
+    sock1 = context.socket(zmq.REQ)
+    sock1.bind('tcp://0.0.0.0:'+port)
+    sock1.send(pickle.dumps(message))
     X_answer = sock.recv()
     print('Data sent. Waiting for classification.')
-    sock.close()
+    sock1.close()
 
     # Espera hasta que concluya la clasificación
-    sock = context.socket(zmq.REQ)
-    sock.bind('tcp://0.0.0.0:'+port_end)
+    sock2 = context.socket(zmq.REQ)
+    sock2.bind('tcp://0.0.0.0:'+port_end)
     end_classif = sock.recv()
-    sock.send_string('ack')
-    sock.close()
+    sock2.send_string('ack')
+    sock2.close()
     end_result = pickle.loads(end_classif)
     if end_result == -1:
         print("Network couldn't classify tour sample. Sorry! =(")
