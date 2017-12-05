@@ -62,15 +62,15 @@ if predicted_classes == 2:
     context = zmq.Context()
     # Preparing ZeroMQ context for the next node...
     sock = context.socket(zmq.REQ)
-    sock.bind('tcp://'+ip_out+':'+port)
+    sock.bind('tcp://0.0.0.0:'+port)
     sock.send(pickle.dumps(message))
     X_answer = sock.recv()
     print('Data sent. Waiting for classification...')
     sock.close()
 
     # Espera hasta que concluya la clasificación
-    sock = context.socket(zmq.REP)
-    sock.connect('tcp://'+ip_in+':'+port_end)
+    sock = context.socket(zmq.REQ)
+    sock.bind('tcp://0.0.0.0:'+port_end)
     end_classif = sock.recv()
     sock.send_string('ack')
     sock.close()
