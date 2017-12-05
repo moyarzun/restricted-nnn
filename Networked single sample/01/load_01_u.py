@@ -79,6 +79,7 @@ if predicted_classes == 2:
             print("Node "+ str(x) +" couldn't classify your sample.")
         else:
             print("Node "+ str(x) +" predicted class: ", result)
+            break
     sock.close()
 else:
     print("Predicted class: ", predicted_classes)
