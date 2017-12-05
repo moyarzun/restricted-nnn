@@ -61,11 +61,11 @@ predicted_classes = model.predict_classes(X_test)
 print()
 print("Value predicted: ", predicted_classes)
 print()
-# ZeroMQ Context
-context = zmq.Context()
 if predicted_classes == 2:
     print("Predicted class: 'other'...")
     print("Continuing classification at next node...")
+    # ZeroMQ Context
+    context = zmq.Context()
     # Preparing ZeroMQ context for the next node...
     sock = context.socket(zmq.REQ)
     sock.bind('tcp://0.0.0.0:'+port)
@@ -75,6 +75,8 @@ if predicted_classes == 2:
     sock.close()
 else:
     print("predicted class: ", predicted_classes)
+    # ZeroMQ Context
+    context = zmq.Context()
     sock = context.socket(zmq.REQ)
     sock.bind('tcp://'+ip_out+':'+port_out)
     sock.send(pickle.dumps(predicted_classes+2))
