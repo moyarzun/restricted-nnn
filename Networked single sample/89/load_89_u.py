@@ -62,15 +62,14 @@ print("Value predicted: ", predicted_classes)
 print()
 if predicted_classes == 2:
     print("Predicted class: 'other'...")
-    print("Continuing classification at next node...")
+    print("Network couldn't find a class for the sample data. Returning to first node.")
     # ZeroMQ Context
     context = zmq.Context()
     # Preparing ZeroMQ context for the next node...
     sock = context.socket(zmq.REQ)
-    sock.bind('tcp://0.0.0.0:'+port)
-    sock.send(pickle.dumps(message))
+    sock.connect('tcp://'+ip_out+':'+port_out)
+    sock.send(pickle.dumps(-1))
     X_answer = sock.recv()
-    print('Data sent to next node.')
     sock.close()
 else:
     print("predicted class: ", predicted_classes)
@@ -80,5 +79,6 @@ else:
     sock.connect('tcp://'+ip_out+':'+port_out)
     end_string = sock.recv()
     sock.send(pickle.dumps(predicted_classes+8))
+    sock.close()
 
 print('Done!')
