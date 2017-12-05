@@ -30,8 +30,8 @@ print("sample", sample)
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-foo = X_test[999]
-print("Class: ", y_test[999])
+foo = X_test[1]
+print("Class: ", y_test[1])
 foo = np.expand_dims(foo, axis=0)
 message = foo
 
@@ -69,7 +69,6 @@ if predicted_classes == 2:
     sock.close()
 
     # Espera hasta que concluya la clasificación
-    sock = context.socket(zmq.REQ)
     sock.bind('tcp://0.0.0.0:'+port_end)
     end_classif = sock.recv()
     sock.send_string('ack')
