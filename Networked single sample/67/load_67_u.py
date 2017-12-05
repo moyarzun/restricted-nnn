@@ -76,6 +76,7 @@ if predicted_classes == 2:
 else:
     print("predicted class: ", predicted_classes)
     sock = context.socket(zmq.REP)
+    print("Sending results to tcp://"+ip_out+":"+port_out+"...")
     sock.connect('tcp://'+ip_out+':'+port_out)
     sock.send(pickle.dumps(predicted_classes+6))
     end_string = sock.recv()
