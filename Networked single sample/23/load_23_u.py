@@ -77,8 +77,8 @@ else:
     print("predicted class: ", predicted_classes)
     # ZeroMQ Context
     context = zmq.Context()
-    sock = context.socket(zmq.REQ)
-    sock.bind('tcp://'+ip_out+':'+port_out)
+    sock = context.socket(zmq.REP)
+    sock.connect('tcp://'+ip_out+':'+port_out)
     sock.send(pickle.dumps(predicted_classes+2))
     end_string = sock.recv()
 
