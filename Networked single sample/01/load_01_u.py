@@ -75,7 +75,7 @@ if predicted_classes == 2:
         sock.send_string('ack')
         result = sock.recv()
         result = pickle.loads(result)
-        if end_result == -1:
+        if result == -1:
             print("Node "+ x +" couldn't classify your sample.")
         else:
             print("Node "+ x +" predicted class: ", end_result)
