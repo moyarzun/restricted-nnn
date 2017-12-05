@@ -69,6 +69,7 @@ if predicted_classes == 2:
     sock.close()
 
     # Espera hasta que concluya la clasificación
+    sock = context.socket(zmq.REQ)
     sock.bind('tcp://0.0.0.0:'+port_end)
     end_classif = sock.recv()
     sock.send_string('ack')
