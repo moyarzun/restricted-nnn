@@ -12,32 +12,33 @@ filenames = '01_u'
 port = '5000'
 port_end = '5001'
 
-
+# Fijar semilla para reproducir experimento
+seed = 2141
+np.random.seed(seed)
 
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
-
-#Inicia medición de tiempo
-start = datetime.now()
 
 ## Gets IP and PORT from command line and parses them
 ConnectionInfo = argparse.ArgumentParser()
 ConnectionInfo.add_argument("-i",  default='127.0.0.1')
 ConnectionInfo.add_argument("-o",  default='0.0.0.0')
+ConnectionInfo.add_argument("-c",  default=math.floor(np.random.random() * 1000))
 ConnectionInfoParsed = ConnectionInfo.parse_args()
 
 # Saves the parsed IP and Port
 ip_in = ConnectionInfoParsed.i
 ip_out = ConnectionInfoParsed.o
+sample = ConnectionInfoParsed.c
 
-# Fijar semilla para reproducir experimento
-seed = 2141
-np.random.seed(seed)
-sample = math.floor(np.random.random() * 1000)
-print("sample", sample)
-
+print("MNIST Sample", sample)
 foo = X_test[1]
-print("Class: ", y_test[1])
+print("Expected class: ", y_test[1])
+
+#Inicia medición de tiempo
+start = datetime.now()
+
+print('Image preprocessing...')
 foo = np.expand_dims(foo, axis=0)
 message = foo
 
@@ -48,19 +49,24 @@ foo = foo.reshape(foo.shape[0], 1, 28, 28).astype('float32')
 # normalizing the data to help with the training
 foo /= 255
 
-# print the final input shape ready for training
-print("Foo matrix shape", foo.shape)
+print('Preprocessing done.')
+print('Loading model and tensors...')
 
 # Cargar modelo preguardado
 model = load_model(filenames + '_model.h5')
 model.load_weights(filenames + '_tensors.h5')
 
-# load the model and create predictions on the test set
-predicted_classes = model.predict_classes(foo)
+print('Model loading done.')
+print('Classifying...')
 
-print()
+# load the model and create predictions on the test set
+class_start = datetime.now()
+predicted_classes = model.predict_classes(foo)
+class_end = datetime.now() - class_start
+
+print('---------------------------')
 print("Value predicted: ", predicted_classes)
-print()
+print('Classification done in (hh:mm:ss.ms) {}'.format(class_end))
 if predicted_classes == 2:
     print("Predicted class: 'other'...")
     print("Continuing classification at next node...")
