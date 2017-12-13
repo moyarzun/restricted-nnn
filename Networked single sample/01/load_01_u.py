@@ -78,7 +78,7 @@ if predicted_classes == 2:
     sock.send(pickle.dumps(message))
     X_answer = sock.recv()
     personal = datetime.now() - start
-    print('Node classification time (hh:mm:ss.ms) {}'.format(personal))
+    print('Node processing time (hh:mm:ss.ms) {}'.format(personal))
     print('Data sent. Waiting for classification...')
     sock.close()
 
