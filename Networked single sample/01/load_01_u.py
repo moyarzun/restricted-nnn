@@ -77,6 +77,8 @@ if predicted_classes == 2:
     sock.bind('tcp://0.0.0.0:'+port)
     sock.send(pickle.dumps(message))
     X_answer = sock.recv()
+    personal = datetime.now() - start
+    print('Node classification time (hh:mm:ss.ms) {}'.format(personal))
     print('Data sent. Waiting for classification...')
     sock.close()
 
@@ -97,5 +99,5 @@ else:
     print("Predicted class: ", predicted_classes)
 
 total = datetime.now() - start
-print('Classification time (hh:mm:ss.ms) {}'.format(total))
+print('Network processing time (hh:mm:ss.ms) {}'.format(total))
 print('Done!')

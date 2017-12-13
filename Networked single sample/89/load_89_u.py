@@ -64,7 +64,7 @@ class_end = datetime.now() - class_start
 
 print('---------------------------')
 print("Value predicted: ", predicted_classes)
-print('Classification done in (hh:mm:ss.ms) {}'.format(class_end))
+print('Node classification done in (hh:mm:ss.ms) {}'.format(class_end))
 if predicted_classes == 2:
     print("Predicted class: 'other'...")
     print("Network couldn't find a class for the sample data. Returning to first node.")
@@ -88,5 +88,5 @@ else:
 
 global_end = datetime.now() - global_start
 
-print('Processing done in (hh:mm:ss.ms) {}'.format(global_end))
+print('Node processing done in (hh:mm:ss.ms) {}'.format(global_end))
 print('Done!')
