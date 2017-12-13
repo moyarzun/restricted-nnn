@@ -31,7 +31,7 @@ ip_in = ConnectionInfoParsed.i
 ip_out = ConnectionInfoParsed.o
 sample = ConnectionInfoParsed.c
 
-print("MNIST Sample", sample)
+print("MNIST Sample", (int)sample)
 foo = X_test[sample]
 print("Expected class: ", y_test[sample])
 
