@@ -36,8 +36,8 @@ np.random.seed(seed)
 sample = math.floor(np.random.random() * 1000)
 print("sample", sample)
 
-foo = X_test[999]
-print("Class: ", y_test[999])
+foo = X_test[1]
+print("Class: ", y_test[1])
 foo = np.expand_dims(foo, axis=0)
 message = foo
 
