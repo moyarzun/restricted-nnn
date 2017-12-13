@@ -2,6 +2,7 @@ import numpy as np
 from keras.datasets import mnist
 from keras.models import load_model
 from keras.utils import np_utils
+from datetime import datetime
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -10,6 +11,14 @@ import zmq, sys, pickle, argparse, copy, math
 filenames = '01_u'
 port = '5000'
 port_end = '5001'
+
+
+
+# Descargar dataset
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+
+#Inicia medición de tiempo
+start = datetime.now()
 
 ## Gets IP and PORT from command line and parses them
 ConnectionInfo = argparse.ArgumentParser()
@@ -26,9 +35,6 @@ seed = 2141
 np.random.seed(seed)
 sample = math.floor(np.random.random() * 1000)
 print("sample", sample)
-
-# Descargar dataset
-(X_train, y_train), (X_test, y_test) = mnist.load_data()
 
 foo = X_test[999]
 print("Class: ", y_test[999])
@@ -84,4 +90,6 @@ if predicted_classes == 2:
 else:
     print("Predicted class: ", predicted_classes)
 
+total = datetime.now() - start
+print('Classification time (hh:mm:ss.ms) {}'.format(total))
 print('Done!')
