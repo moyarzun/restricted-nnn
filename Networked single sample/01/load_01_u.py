@@ -29,7 +29,7 @@ ConnectionInfoParsed = ConnectionInfo.parse_args()
 # Saves the parsed IP and Port
 ip_in = ConnectionInfoParsed.i
 ip_out = ConnectionInfoParsed.o
-sample = ConnectionInfoParsed.c
+sample = int(ConnectionInfoParsed.c)
 
 print("MNIST Sample", int(sample))
 foo = X_test[sample]
