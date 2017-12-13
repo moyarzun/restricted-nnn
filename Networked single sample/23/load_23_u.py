@@ -1,6 +1,7 @@
 import numpy as np
 from keras.models import load_model
 from keras.utils import np_utils
+from datetime import datetime
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -56,11 +57,14 @@ model = load_model(filenames + '_model.h5')
 model.load_weights(filenames + '_tensors.h5')
 
 # load the model and create predictions on the test set
+class_start = datetime.now()
 predicted_classes = model.predict_classes(X_test)
+class_end = datetime.now() - class_start
 
-print()
+
+print('---------------------------')
 print("Value predicted: ", predicted_classes)
-print()
+print('Classification done in (hh:mm:ss.ms) {}'.format(class_end))
 if predicted_classes == 2:
     print("Predicted class: 'other'...")
     print("Continuing classification at next node...")
