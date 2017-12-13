@@ -32,8 +32,8 @@ ip_out = ConnectionInfoParsed.o
 sample = ConnectionInfoParsed.c
 
 print("MNIST Sample", sample)
-foo = X_test[1]
-print("Expected class: ", y_test[1])
+foo = X_test[sample]
+print("Expected class: ", y_test[sample])
 
 #Inicia medición de tiempo
 start = datetime.now()
