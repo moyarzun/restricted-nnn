@@ -46,6 +46,8 @@ sock.close()
 print('Data received. Starting classification...')
 message = X_test
 
+global_start = datetime.now()
+
 # building the input vector from the 28x28 pixels
 X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
 
@@ -85,4 +87,7 @@ else:
     end_string = sock.recv()
     sock.send(pickle.dumps(predicted_classes+6))
 
+global_end = datetime.now() - global_start
+
+print('Processing done in (hh:mm:ss.ms) {}'.format(global_end))
 print('Done!')
