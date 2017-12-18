@@ -18,7 +18,7 @@ seed = 2141
 np.random.seed(seed)
 
 filenames = 'big'
-n_classes = 8
+n_classes = 10
 
 # Dataset download (If not local, from Internet)
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -27,9 +27,11 @@ n_classes = 8
 # Re-tagging the dataset for the specific classes we want to train
 # 0 or 1 -> 'Others' (noted as Class 0)
 # Otherwise -> Their respective classes
-y_train[y_train<=1]=0
+# y_train[y_train==0]=0
+# y_train[y_train==1]=0
 
-y_test[y_test<=1]=0
+# y_test[y_test==0]=0
+# y_test[y_test==0]=0
 ###############################
 
 # Building the input vector from the 28x28 pixels
@@ -45,26 +47,10 @@ Y_train = np_utils.to_categorical(y_train, n_classes)
 Y_test = np_utils.to_categorical(y_test, n_classes)
 
 # Model design
-
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-# define the larger model
 def larger_model():
 	# create model
 	model = Sequential()
-	model.add(Conv2D(30, (5, 5), input_shape=(1, 28, 28), activation='relu'))
+	model.add(Conv2D(30, (5, 5), input_shape=(1, 28, 28), activation='relu', data_format='channels_first'))
 	model.add(MaxPooling2D(pool_size=(2, 2)))
 	model.add(Conv2D(15, (3, 3), activation='relu'))
 	model.add(MaxPooling2D(pool_size=(2, 2)))
@@ -72,7 +58,7 @@ def larger_model():
 	model.add(Flatten())
 	model.add(Dense(128, activation='relu'))
 	model.add(Dense(50, activation='relu'))
-	model.add(Dense(num_classes, activation='softmax'))
+	model.add(Dense(n_classes, activation='softmax'))
 	# Compile model
 	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 	return model
@@ -85,7 +71,7 @@ model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer='
 
 # Model training and metrics capture
 history = model.fit(X_train, Y_train,
-          batch_size=200, epochs=5,
+          batch_size=100, epochs=20,
           verbose=1,
           validation_data=(X_test, Y_test))
 

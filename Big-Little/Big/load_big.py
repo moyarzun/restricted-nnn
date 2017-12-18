@@ -67,36 +67,7 @@ class_end = datetime.now() - class_start
 print('---------------------------')
 print("Value predicted: ", predicted_classes)
 print('Classification done in (hh:mm:ss.ms) {}'.format(class_end))
-if predicted_classes == 2:
-    print("Predicted class: 'other'...")
-    print("Continuing classification at next node...")
-    # ZeroMQ Context
-    context = zmq.Context()
-    # Preparing ZeroMQ context for the next node...
-    sock = context.socket(zmq.REQ)
-    sock.bind('tcp://0.0.0.0:'+port)
-    sock.send(pickle.dumps(message))
-    X_answer = sock.recv()
-    personal = datetime.now() - start
-    print('Node processing time (hh:mm:ss.ms) {}'.format(personal))
-    print('Data sent. Waiting for classification...')
-    sock.close()
-
-    # Espera hasta que concluya la clasificación
-    sock = context.socket(zmq.REQ)
-    sock.bind('tcp://0.0.0.0:'+port_end)
-    for x in range (1, 6):
-        sock.send_string('ack')
-        result = sock.recv()
-        result = pickle.loads(result)
-        if result == -1:
-            print("Node "+ str(x) +" couldn't classify your sample.")
-        else:
-            print("Node "+ str(x) +" predicted class: ", result)
-            break
-    sock.close()
-else:
-    print("Predicted class: ", predicted_classes)
+print("Predicted class: ", predicted_classes)
 
 total = datetime.now() - start
 print('Network processing time (hh:mm:ss.ms) {}'.format(total))
