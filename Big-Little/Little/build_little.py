@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 seed = 2141
 np.random.seed(seed)
 
-filenames = '01_u'
+filenames = 'little'
 n_classes = 3
 
 # Dataset download (If not local, from Internet)
