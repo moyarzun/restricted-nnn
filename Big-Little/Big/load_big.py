@@ -1,74 +1,80 @@
 import numpy as np
-from keras.datasets import mnist
 from keras.models import load_model
 from keras.utils import np_utils
 from datetime import datetime
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import zmq, sys, pickle, argparse, copy, math
+import zmq, pickle, sys, argparse, copy
 
 filenames = 'big'
 port = '5000'
-port_end = '5001'
+port_out = '5001'
 
-# Fijar semilla para reproducir experimento
-seed = 2141
-np.random.seed(seed)
+# ZeroMQ Context
+context = zmq.Context()
 
-# Descargar dataset
-(X_train, y_train), (X_test, y_test) = mnist.load_data()
+# Define the socket using the "Context"
+sock = context.socket(zmq.REP)
 
 ## Gets IP and PORT from command line and parses them
 ConnectionInfo = argparse.ArgumentParser()
 ConnectionInfo.add_argument("-i",  default='127.0.0.1')
 ConnectionInfo.add_argument("-o",  default='0.0.0.0')
-ConnectionInfo.add_argument("-c",  default=math.floor(np.random.random() * 1000))
 ConnectionInfoParsed = ConnectionInfo.parse_args()
 
 # Saves the parsed IP and Port
 ip_in = ConnectionInfoParsed.i
 ip_out = ConnectionInfoParsed.o
-sample = int(ConnectionInfoParsed.c)
 
-print("MNIST Sample", int(sample))
-foo = X_test[sample]
-print("Expected class: ", y_test[sample])
+try:
+    sock.connect('tcp://'+ip_in+':'+port)
+except:
+    print('Usage: python load_'+filenames+'.py -i <valid input ip address> -o <valid output ip address>')
 
-#Inicia medición de tiempo
-start = datetime.now()
+# Fijar semilla para reproducir experimento
+seed = 2141
+np.random.seed(seed)
 
-print('Image preprocessing...')
-foo = np.expand_dims(foo, axis=0)
-message = foo
+# Run a simple "Echo" server
+print('Listening to tcp://'+ip_in+':'+port+'...')
+X_message = sock.recv()
+print('Receiving data...')
+X_test = pickle.loads(X_message)
+sock.send(pickle.dumps(X_message))
+sock.close()
+print('Data received. Starting classification...')
+
+global_start = datetime.now()
 
 # building the input vector from the 28x28 pixels
-foo = foo.reshape(foo.shape[0], 1, 28, 28).astype('float32')
-#X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
+X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
 
 # normalizing the data to help with the training
-foo /= 255
-
-print('Preprocessing done.')
-print('Loading model and tensors...')
+X_test /= 255
 
 # Cargar modelo preguardado
 model = load_model(filenames + '_model.h5')
 model.load_weights(filenames + '_tensors.h5')
 
-print('Model loading done.')
-print('Classifying...')
-
 # load the model and create predictions on the test set
 class_start = datetime.now()
-predicted_classes = model.predict_classes(foo)
+predicted_classes = model.predict_classes(X_test)
 class_end = datetime.now() - class_start
 
 print('---------------------------')
 print("Value predicted: ", predicted_classes)
-print('Classification done in (hh:mm:ss.ms) {}'.format(class_end))
-print("Predicted class: ", predicted_classes)
+print('Node classification done in (hh:mm:ss.ms) {}'.format(class_end))
+print("predicted class: ", predicted_classes)
+# ZeroMQ Context
+context = zmq.Context()
+sock = context.socket(zmq.REP)
+sock.connect('tcp://'+ip_out+':'+port_out)
+end_string = sock.recv()
+sock.send(pickle.dumps(predicted_classes))
+sock.close()
 
-total = datetime.now() - start
-print('Network processing time (hh:mm:ss.ms) {}'.format(total))
+global_end = datetime.now() - global_start
+
+print('Node processing done in (hh:mm:ss.ms) {}'.format(global_end))
 print('Done!')
