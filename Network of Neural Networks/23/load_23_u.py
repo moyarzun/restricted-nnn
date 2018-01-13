@@ -11,6 +11,12 @@ filenames = '23_u'
 port = '5000'
 port_out = '5001'
 
+print('Loading model and tensors...')
+# Cargar modelo preguardado
+model = load_model(filenames + '_model.h5')
+model.load_weights(filenames + '_tensors.h5')
+print('Model loading done.')
+
 # ZeroMQ Context
 context = zmq.Context()
 
@@ -53,10 +59,6 @@ X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
 
 # normalizing the data to help with the training
 X_test /= 255
-
-# Cargar modelo preguardado
-model = load_model(filenames + '_model.h5')
-model.load_weights(filenames + '_tensors.h5')
 
 # load the model and create predictions on the test set
 class_start = datetime.now()

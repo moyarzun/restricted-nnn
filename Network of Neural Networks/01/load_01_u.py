@@ -16,6 +16,12 @@ port_end = '5001'
 seed = 2141
 np.random.seed(seed)
 
+print('Loading model and tensors...')
+# Cargar modelo preguardado
+model = load_model(filenames + '_model.h5')
+model.load_weights(filenames + '_tensors.h5')
+print('Model loading done. Downloading dataset...')
+
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
@@ -26,12 +32,13 @@ ConnectionInfo.add_argument("-o",  default='0.0.0.0')
 ConnectionInfo.add_argument("-c",  default=math.floor(np.random.random() * 1000))
 ConnectionInfoParsed = ConnectionInfo.parse_args()
 
+print("Dataset downloaded.")
 # Saves the parsed IP and Port
 ip_in = ConnectionInfoParsed.i
 ip_out = ConnectionInfoParsed.o
 sample = int(ConnectionInfoParsed.c)
 
-print("MNIST Sample", int(sample))
+print("MNIST Sample chosen", int(sample))
 foo = X_test[sample]
 print("Expected class: ", y_test[sample])
 
@@ -50,13 +57,6 @@ foo = foo.reshape(foo.shape[0], 1, 28, 28).astype('float32')
 foo /= 255
 
 print('Preprocessing done.')
-print('Loading model and tensors...')
-
-# Cargar modelo preguardado
-model = load_model(filenames + '_model.h5')
-model.load_weights(filenames + '_tensors.h5')
-
-print('Model loading done.')
 print('Classifying...')
 
 # load the model and create predictions on the test set
