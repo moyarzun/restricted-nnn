@@ -16,6 +16,14 @@ port_end = '5001'
 seed = 2141
 np.random.seed(seed)
 
+print('Loading model and tensors...')
+
+# Cargar modelo preguardado
+model = load_model(filenames + '_model.h5')
+model.load_weights(filenames + '_tensors.h5')
+
+print('Model loading done.')
+
 # Descargar dataset
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
@@ -50,13 +58,6 @@ foo = foo.reshape(foo.shape[0], 1, 28, 28).astype('float32')
 foo /= 255
 
 print('Preprocessing done.')
-print('Loading model and tensors...')
-
-# Cargar modelo preguardado
-model = load_model(filenames + '_model.h5')
-model.load_weights(filenames + '_tensors.h5')
-
-print('Model loading done.')
 print('Classifying...')
 
 # load the model and create predictions on the test set
