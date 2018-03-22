@@ -42,53 +42,54 @@ except:
 seed = 2141
 np.random.seed(seed)
 
-# Run a simple "Echo" server
-print('Listening to tcp://'+ip_in+':'+port+'...')
-X_message = sock.recv()
-print('Receiving data...')
-X_test = pickle.loads(X_message)
-sock.send(pickle.dumps(X_message))
-sock.close()
-print('Data received. Starting classification...')
-
-global_start = datetime.now()
-
-# building the input vector from the 28x28 pixels
-X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
-
-# normalizing the data to help with the training
-X_test /= 255
-
-# load the model and create predictions on the test set
-class_start = datetime.now()
-predicted_classes = model.predict_classes(X_test)
-class_end = datetime.now() - class_start
-
-print('---------------------------')
-print("Value predicted: ", predicted_classes)
-print('Node classification done in (hh:mm:ss.ms) {}'.format(class_end))
-if predicted_classes == 2:
-    print("Predicted class: 'other'...")
-    print("Network couldn't find a class for the sample data. Returning to first node.")
-    # ZeroMQ Context
-    context = zmq.Context()
-    # Preparing ZeroMQ context for the next node...
-    sock = context.socket(zmq.REQ)
-    sock.connect('tcp://'+ip_out+':'+port_out)
-    sock.send(pickle.dumps(-1))
-    X_answer = sock.recv()
+while True:
+    # Run a simple "Echo" server
+    print('Listening to tcp://'+ip_in+':'+port+'...')
+    X_message = sock.recv()
+    print('Receiving data...')
+    X_test = pickle.loads(X_message)
+    sock.send(pickle.dumps(X_message))
     sock.close()
-else:
-    print("predicted class: ", predicted_classes)
-    # ZeroMQ Context
-    context = zmq.Context()
-    sock = context.socket(zmq.REP)
-    sock.connect('tcp://'+ip_out+':'+port_out)
-    end_string = sock.recv()
-    sock.send(pickle.dumps(predicted_classes+8))
-    sock.close()
+    print('Data received. Starting classification...')
 
-global_end = datetime.now() - global_start
+    global_start = datetime.now()
 
-print('Node processing done in (hh:mm:ss.ms) {}'.format(global_end))
-print('Done!')
+    # building the input vector from the 28x28 pixels
+    X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
+
+    # normalizing the data to help with the training
+    X_test /= 255
+
+    # load the model and create predictions on the test set
+    class_start = datetime.now()
+    predicted_classes = model.predict_classes(X_test)
+    class_end = datetime.now() - class_start
+
+    print('---------------------------')
+    print("Value predicted: ", predicted_classes)
+    print('Node classification done in (hh:mm:ss.ms) {}'.format(class_end))
+    if predicted_classes == 2:
+        print("Predicted class: 'other'...")
+        print("Network couldn't find a class for the sample data. Returning to first node.")
+        # ZeroMQ Context
+        context = zmq.Context()
+        # Preparing ZeroMQ context for the next node...
+        sock = context.socket(zmq.REQ)
+        sock.connect('tcp://'+ip_out+':'+port_out)
+        sock.send(pickle.dumps(-1))
+        X_answer = sock.recv()
+        sock.close()
+    else:
+        print("predicted class: ", predicted_classes)
+        # ZeroMQ Context
+        context = zmq.Context()
+        sock = context.socket(zmq.REP)
+        sock.connect('tcp://'+ip_out+':'+port_out)
+        end_string = sock.recv()
+        sock.send(pickle.dumps(predicted_classes+8))
+        sock.close()
+
+    global_end = datetime.now() - global_start
+
+    print('Node processing done in (hh:mm:ss.ms) {}'.format(global_end))
+    print('Done!')

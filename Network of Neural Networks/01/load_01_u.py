@@ -3,7 +3,7 @@ from keras.datasets import mnist
 from keras.models import load_model
 from keras.utils import np_utils
 from datetime import datetime
-import matplotlib
+import matplotlib, csv
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import zmq, sys, pickle, argparse, copy, math
@@ -29,8 +29,9 @@ print('Model loading done. Downloading dataset...')
 ConnectionInfo = argparse.ArgumentParser()
 ConnectionInfo.add_argument("-i",  default='127.0.0.1')
 ConnectionInfo.add_argument("-o",  default='0.0.0.0')
-ConnectionInfo.add_argument("-c",  default=math.floor(np.random.random() * 1000))
+ConnectionInfo.add_argument("-c",  default=-1)
 ConnectionInfoParsed = ConnectionInfo.parse_args()
+ConnectionInfo.add_argument("-n",  default=1)
 
 print("Dataset downloaded.")
 # Saves the parsed IP and Port
@@ -38,66 +39,74 @@ ip_in = ConnectionInfoParsed.i
 ip_out = ConnectionInfoParsed.o
 sample = int(ConnectionInfoParsed.c)
 
-print("MNIST Sample chosen", int(sample))
-foo = X_test[sample]
-print("Expected class: ", y_test[sample])
+for exp in range (0, int(ConnectionInfoParsed.n)):
 
-#Inicia medición de tiempo
-start = datetime.now()
+    if sample < 0:
+        sample = math.floor(np.random.random() * 1000)
 
-print('Image preprocessing...')
-foo = np.expand_dims(foo, axis=0)
-message = foo
+    print("MNIST Sample chosen", int(sample))
+    foo = X_test[sample]
+    print("Expected class: ", y_test[sample])
 
-# building the input vector from the 28x28 pixels
-foo = foo.reshape(foo.shape[0], 1, 28, 28).astype('float32')
-#X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
+    #Inicia medición de tiempo
+    start = datetime.now()
 
-# normalizing the data to help with the training
-foo /= 255
+    print('Image preprocessing...')
+    foo = np.expand_dims(foo, axis=0)
+    message = foo
 
-print('Preprocessing done.')
-print('Classifying...')
+    # building the input vector from the 28x28 pixels
+    foo = foo.reshape(foo.shape[0], 1, 28, 28).astype('float32')
+    #X_test = X_test.reshape(X_test.shape[0], 1, 28, 28).astype('float32')
 
-# load the model and create predictions on the test set
-class_start = datetime.now()
-predicted_classes = model.predict_classes(foo)
-class_end = datetime.now() - class_start
+    # normalizing the data to help with the training
+    foo /= 255
 
-print('---------------------------')
-print("Value predicted: ", predicted_classes)
-print('Classification done in (hh:mm:ss.ms) {}'.format(class_end))
-if predicted_classes == 2:
-    print("Predicted class: 'other'...")
-    print("Continuing classification at next node...")
-    # ZeroMQ Context
-    context = zmq.Context()
-    # Preparing ZeroMQ context for the next node...
-    sock = context.socket(zmq.REQ)
-    sock.bind('tcp://0.0.0.0:'+port)
-    sock.send(pickle.dumps(message))
-    X_answer = sock.recv()
-    personal = datetime.now() - start
-    print('Node processing time (hh:mm:ss.ms) {}'.format(personal))
-    print('Data sent. Waiting for classification...')
-    sock.close()
+    print('Preprocessing done.')
+    print('Classifying...')
 
-    # Espera hasta que concluya la clasificación
-    sock = context.socket(zmq.REQ)
-    sock.bind('tcp://0.0.0.0:'+port_end)
-    for x in range (1, 6):
-        sock.send_string('ack')
-        result = sock.recv()
-        result = pickle.loads(result)
-        if result == -1:
-            print("Node "+ str(x) +" couldn't classify your sample.")
-        else:
-            print("Node "+ str(x) +" predicted class: ", result)
-            break
-    sock.close()
-else:
-    print("Predicted class: ", predicted_classes)
+    # load the model and create predictions on the test set
+    class_start = datetime.now()
+    predicted_classes = model.predict_classes(foo)
+    class_end = datetime.now() - class_start
 
-total = datetime.now() - start
-print('Network processing time (hh:mm:ss.ms) {}'.format(total))
-print('Done!')
+    print('---------------------------')
+    print("Value predicted: ", predicted_classes)
+    print('Classification done in (hh:mm:ss.ms) {}'.format(class_end))
+    if predicted_classes == 2:
+        print("Predicted class: 'other'...")
+        print("Continuing classification at next node...")
+        # ZeroMQ Context
+        context = zmq.Context()
+        # Preparing ZeroMQ context for the next node...
+        sock = context.socket(zmq.REQ)
+        sock.bind('tcp://0.0.0.0:'+port)
+        sock.send(pickle.dumps(message))
+        X_answer = sock.recv()
+        personal = datetime.now() - start
+        print('Node processing time (hh:mm:ss.ms) {}'.format(personal))
+        print('Data sent. Waiting for classification...')
+        sock.close()
+
+        # Espera hasta que concluya la clasificación
+        sock = context.socket(zmq.REQ)
+        sock.bind('tcp://0.0.0.0:'+port_end)
+        for x in range (1, 6):
+            sock.send_string('ack')
+            result = sock.recv()
+            result = pickle.loads(result)
+            if result == -1:
+                print("Node "+ str(x) +" couldn't classify your sample.")
+            else:
+                print("Node "+ str(x) +" predicted class: ", result)
+                break
+        sock.close()
+    else:
+        print("Predicted class: ", predicted_classes)
+
+    total = datetime.now() - start
+    print('Network processing time (hh:mm:ss.ms) {}'.format(total))
+    with open('iterative_results.csv', 'wb') as f:
+        writer = csv.writer(f)
+        writer.writerows(exp, sample, format(total))
+    print('Done!')
